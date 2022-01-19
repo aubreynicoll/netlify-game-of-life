@@ -1,6 +1,6 @@
 {
   "name": "netlify-game-of-life",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple app that uses WebAssembly to calculate Conway's Game of Life",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/aubreynicoll/netlify-game-of-life#readme",
   "dependencies": {
-    "@aubreynicoll/wasm-game-of-life": "^0.1.0"
+    "@aubreynicoll/wasm-game-of-life": "^0.1.3"
   },
   "devDependencies": {
     "webpack": "^4.29.3",

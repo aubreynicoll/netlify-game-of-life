@@ -1,19 +1,36 @@
 import { Universe, Cell } from "@aubreynicoll/wasm-game-of-life";
 import { memory } from "@aubreynicoll/wasm-game-of-life/wasm_game_of_life_bg";
-import sleep from "./helpers/sleep";
 
 const CELL_SIZE = 10;
 const GRID_COLOR = "#CCCCCC";
 const ALIVE_COLOR = "#000000";
 const DEAD_COLOR = "#FFFFFF";
 
-const universe = Universe.new();
+let universe = Universe.new(false);
 const width = universe.width();
 const height = universe.height();
 
 const canvas = document.getElementById("game-of-life-canvas");
 canvas.width = (CELL_SIZE + 1) * width + 1;
 canvas.height = (CELL_SIZE + 1) * height + 1;
+
+canvas.addEventListener("click", (event) => {
+  const boundingRect = canvas.getBoundingClientRect();
+
+  const scaleX = canvas.width / boundingRect.width;
+  const scaleY = canvas.height / boundingRect.height;
+
+  const canvasLeft = (event.clientX - boundingRect.left) * scaleX;
+  const canvasTop = (event.clientY - boundingRect.top) * scaleY;
+
+  const row = Math.min(Math.floor(canvasTop / (CELL_SIZE + 1)), height - 1);
+  const col = Math.min(Math.floor(canvasLeft / (CELL_SIZE + 1)), width - 1);
+
+  universe.toggle_cell(row, col);
+
+  drawGrid();
+  drawCells();
+});
 
 const ctx = canvas.getContext("2d");
 
@@ -56,17 +73,49 @@ const drawCells = () => {
   ctx.stroke();
 };
 
-const renderLoop = async () => {
-  universe.tick();
+let animationHandle = null;
 
+const renderLoop = async () => {
+  animationHandle = requestAnimationFrame(renderLoop);
+  if (animationHandle % 10 === 0) {
+    universe.tick();
+    drawGrid();
+    drawCells();
+  }
+};
+
+const isPaused = () => animationHandle === null;
+
+const play = () => {
+  playPauseButton.textContent = "pause";
+  renderLoop();
+};
+
+const pause = () => {
+  playPauseButton.textContent = "play";
+  cancelAnimationFrame(animationHandle);
+  animationHandle = null;
+};
+
+const playPauseButton = document.getElementById("play-pause");
+playPauseButton.addEventListener("click", () => {
+  isPaused() ? play() : pause();
+});
+
+const newRandomButton = document.getElementById("new-random");
+newRandomButton.addEventListener("click", () => {
+  universe = Universe.new(true);
   drawGrid();
   drawCells();
+});
 
-  await sleep(100);
-
-  requestAnimationFrame(renderLoop);
-};
+const newBlankButton = document.getElementById("new-blank");
+newBlankButton.addEventListener("click", () => {
+  universe = Universe.new(false);
+  drawGrid();
+  drawCells();
+});
 
 drawGrid();
 drawCells();
-requestAnimationFrame(renderLoop);
+pause();

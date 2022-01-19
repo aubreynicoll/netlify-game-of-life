@@ -13,6 +13,9 @@
         align-items: center;
         justify-content: center;
       }
+      .div-row {
+        display: flex;
+      }
     </style>
   </head>
   <body>
@@ -20,6 +23,11 @@
       >This page contains webassembly and javascript content, please enable
       javascript in your browser.</noscript
     >
+    <div class="div-row">
+      <button id="play-pause"></button>
+      <button id="new-random">random</button>
+      <button id="new-blank">blank</button>
+    </div>
     <canvas id="game-of-life-canvas"></canvas>
     <script src="./bootstrap.js"></script>
   </body>
