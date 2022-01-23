@@ -1,5 +1,6 @@
 import { Universe, Cell } from "@aubreynicoll/wasm-game-of-life";
 import { memory } from "@aubreynicoll/wasm-game-of-life/wasm_game_of_life_bg";
+import fps from "./classes/fps";
 
 const CELL_SIZE = 10;
 const GRID_COLOR = "#CCCCCC";
@@ -58,10 +59,14 @@ const drawCells = () => {
 
   ctx.beginPath();
 
+  ctx.fillStyle = ALIVE_COLOR;
   for (let row = 0; row < height; row++) {
     for (let col = 0; col < width; col++) {
-      const i = universe.get_index(row, col);
-      ctx.fillStyle = cells[i] === Cell.Alive ? ALIVE_COLOR : DEAD_COLOR;
+      const idx = getIndex(row, col);
+      if (cells[idx] !== Cell.Alive) {
+        continue;
+      }
+
       ctx.fillRect(
         col * (CELL_SIZE + 1) + 1,
         row * (CELL_SIZE + 1) + 1,
@@ -70,18 +75,35 @@ const drawCells = () => {
       );
     }
   }
+
+  ctx.fillStyle = DEAD_COLOR;
+  for (let row = 0; row < height; row++) {
+    for (let col = 0; col < width; col++) {
+      const idx = getIndex(row, col);
+      if (cells[idx] !== Cell.Dead) {
+        continue;
+      }
+
+      ctx.fillRect(
+        col * (CELL_SIZE + 1) + 1,
+        row * (CELL_SIZE + 1) + 1,
+        CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
+
   ctx.stroke();
 };
 
 let animationHandle = null;
 
 const renderLoop = async () => {
+  fps.render();
+  universe.tick();
+  drawGrid();
+  drawCells();
   animationHandle = requestAnimationFrame(renderLoop);
-  if (animationHandle % 10 === 0) {
-    universe.tick();
-    drawGrid();
-    drawCells();
-  }
 };
 
 const isPaused = () => animationHandle === null;
